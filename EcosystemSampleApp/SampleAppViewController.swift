@@ -1,4 +1,3 @@
-//
 //  ViewController.swift
 //  EcosystemSampleApp
 //
@@ -219,5 +218,69 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
             }
         }
     }
+    
+    @IBAction func payToUserTapped(_ sender: Any) {
+        
+        let receipientUserId = ""
+        
+        guard let appId = appId, let jwtPKey = privateKey else {
+            alertConfigIssue()
+            return
+        }
+        
+        do {
+            try jwtLoginWith(lastUser, id: appId)
+        } catch {
+            alertStartError(error)
+        }
+        
+        let offerID = "WOWOMGCRAZY"+"\(arc4random_uniform(999999))"
+        guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
+                                                    "typ": "jwt",
+                                                    "kid" : "rs512_0"],
+                                           body: ["offer":["id":offerID, "amount":10],
+                                                  "sender":
+                                                    ["title":"Pay To User",
+                                                     "description":"A P2P example",
+                                                     "user_id":lastUser],
+                                                  "recipient":
+                                                    ["title":"Received Kin",
+                                                    "description":"A P2P example",
+                                                    "user_id":receipientUserId]],
+                                                    subject: "pay_to_user",
+                                                    id: appId,
+                                                    privateKey: jwtPKey) else {
+                                                        alertConfigIssue()
+                                                        return
+                                                    }
+        
+        spendIndicator.startAnimating()
+        _ = Kin.shared.payToUser(offerJWT: encoded) { jwtConfirmation, error in
+            DispatchQueue.main.async { [weak self] in
+                self?.buyStickerButton.isEnabled = true
+                self?.spendIndicator.stopAnimating()
+                let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+                if let confirm = jwtConfirmation {
+                    alert.title = "Success"
+                    alert.message = "Pay To User completed. You can view the confirmation on jwt.io"
+                    alert.addAction(UIAlertAction(title: "View on jwt.io", style: .default, handler: { [weak alert] action in
+                        UIApplication.shared.openURL(URL(string:"https://jwt.io/#debugger-io?token=\(confirm)")!)
+                        alert?.dismiss(animated: true, completion: nil)
+                    }))
+                } else if let e = error {
+                    alert.title = "Failure"
+                    alert.message = "Pay To User failed (\(e.localizedDescription))"
+                }
+                
+                alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: { [weak alert] action in
+                    alert?.dismiss(animated: true, completion: nil)
+                }))
+                
+                self?.present(alert, animated: true, completion: nil)
+            }
+        }
+        
+    }
+    
 }
 
