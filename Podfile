@@ -4,6 +4,5 @@ target 'EcosystemSampleApp' do
 
   pod 'KinEcosystem', :path => '../kin-devplatform-ios'
   pod 'JWT', '3.0.0-beta.8'
-  pod "HockeySDK"
 
 end
