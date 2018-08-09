@@ -221,7 +221,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func payToUserTapped(_ sender: Any) {
         
-        let receipientUserId = ""
+        let receipientUserId = "a23d5f77-05b5-4688-899b-9ff2206c6534"
         
         guard let appId = appId, let jwtPKey = privateKey else {
             alertConfigIssue()
