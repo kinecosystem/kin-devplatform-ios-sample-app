@@ -221,7 +221,8 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func payToUserTapped(_ sender: Any) {
         
-        let receipientUserId = "a23d5f77-05b5-4688-899b-9ff2206c6534"
+        let receipientUserId = "user_63407_1"
+        let amount = 10
         
         guard let appId = appId, let jwtPKey = privateKey else {
             alertConfigIssue()
@@ -238,7 +239,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
                                                     "typ": "jwt",
                                                     "kid" : "rs512_0"],
-                                           body: ["offer":["id":offerID, "amount":10],
+                                           body: ["offer":["id":offerID, "amount": amount],
                                                   "sender":
                                                     ["title":"Pay To User",
                                                      "description":"A P2P example",
@@ -261,8 +262,8 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                 self?.spendIndicator.stopAnimating()
                 let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
                 if let confirm = jwtConfirmation {
-                    alert.title = "Success"
-                    alert.message = "Pay To User completed. You can view the confirmation on jwt.io"
+                    alert.title = "Pay To User - Success"
+                    alert.message = "You sent to: \(receipientUserId)\nAmount: \(amount)\nYou can view the confirmation on jwt.io"
                     alert.addAction(UIAlertAction(title: "View on jwt.io", style: .default, handler: { [weak alert] action in
                         UIApplication.shared.openURL(URL(string:"https://jwt.io/#debugger-io?token=\(confirm)")!)
                         alert?.dismiss(animated: true, completion: nil)
