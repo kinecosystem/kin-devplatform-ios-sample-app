@@ -7,17 +7,13 @@
 //
 
 import UIKit
-import HockeySDK
-import KinEcosystem
+import KinDevPlatform
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-        BITHockeyManager.shared().configure(withIdentifier: "b652ffb01ad64bdeabe07a50b2a8d8d1")
-        BITHockeyManager.shared().start()
-        BITHockeyManager.shared().authenticator.authenticateInstallation()
         Kin.shared.setLogLevel(.verbose)
         return true
     }
