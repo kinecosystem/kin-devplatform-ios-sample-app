@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import KinEcosystem
+import KinDevPlatform
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 

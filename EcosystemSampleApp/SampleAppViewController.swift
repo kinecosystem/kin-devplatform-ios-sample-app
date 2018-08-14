@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import KinEcosystem
+import KinDevPlatform
 import JWT
 
 class SampleAppViewController: UIViewController, UITextFieldDelegate {
@@ -221,7 +221,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func payToUserTapped(_ sender: Any) {
         
-        let receipientUserId = "user_63407_1"
+        let receipientUserId = "user_37786_2"
         let amount = 10
         
         guard let appId = appId, let jwtPKey = privateKey else {
@@ -283,5 +283,8 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         
     }
     
+    @IBAction func nativeEarnTapped(_ sender: Any) {
+        
+    }
 }
 
