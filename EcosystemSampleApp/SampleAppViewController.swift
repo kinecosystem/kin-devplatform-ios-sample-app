@@ -239,7 +239,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
                                                     "typ": "jwt",
                                                     "kid" : "rs512_0"],
-                                           body: ["offer":["id":offerID, "amount": amount],
+                                           body: ["offer":["id": offerID, "amount": amount],
                                                   "sender":
                                                     ["title":"Pay To User",
                                                      "description":"A P2P example",
@@ -247,7 +247,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                                                   "recipient":
                                                     ["title":"Received Kin",
                                                     "description":"A P2P example",
-                                                    "user_id":receipientUserId]],
+                                                    "user_id": receipientUserId]],
                                                     subject: "pay_to_user",
                                                     id: appId,
                                                     privateKey: jwtPKey) else {
@@ -270,7 +270,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                     }))
                 } else if let e = error {
                     alert.title = "Failure"
-                    alert.message = "Pay To User failed (\(e.localizedDescription))"
+                    alert.message = "Pay To User failed: (\(e.localizedDescription))"
                 }
                 
                 alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: { [weak alert] action in
@@ -285,6 +285,59 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func nativeEarnTapped(_ sender: Any) {
         
+        let amount = 10
+        let offerID = "WOWOMGCRAZY"+"\(arc4random_uniform(999999))"
+        
+        guard let appId = appId, let jwtPKey = privateKey else {
+            alertConfigIssue()
+            return
+        }
+        
+        do {
+            try jwtLoginWith(lastUser, id: appId)
+        } catch {
+            alertStartError(error)
+        }
+        
+        guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
+                                                    "typ": "jwt",
+                                                    "kid" : "rs512_0"],
+                                           body: ["offer":["id":offerID, "amount": amount],
+                                                  "recipient":
+                                                    ["title":"Received Kin",
+                                                     "description":"Native Earn example",
+                                                     "user_id": lastUser]],
+                                                     subject: "earn",
+                                                     id: appId,
+                                                     privateKey: jwtPKey) else {
+                                                        alertConfigIssue()
+                                                        return
+                                                        }
+        spendIndicator.startAnimating()
+        _ = Kin.shared.requestPayment(offerJWT: encoded) { jwtConfirmation, error in
+            DispatchQueue.main.async { [weak self] in
+                self?.buyStickerButton.isEnabled = true
+                self?.spendIndicator.stopAnimating()
+                let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+                if let confirm = jwtConfirmation {
+                    alert.title = "Native Earn - Success"
+                    alert.message = "Amount: \(amount)\nYou can view the confirmation on jwt.io"
+                    alert.addAction(UIAlertAction(title: "View on jwt.io", style: .default, handler: { [weak alert] action in
+                        UIApplication.shared.openURL(URL(string:"https://jwt.io/#debugger-io?token=\(confirm)")!)
+                        alert?.dismiss(animated: true, completion: nil)
+                    }))
+                } else if let e = error {
+                    alert.title = "Failure"
+                    alert.message = "Native Earn failed: (\(e.localizedDescription))"
+                }
+                
+                alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: { [weak alert] action in
+                    alert?.dismiss(animated: true, completion: nil)
+                }))
+                
+                self?.present(alert, animated: true, completion: nil)
+            }
+        }
     }
 }
 
