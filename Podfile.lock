@@ -4,7 +4,7 @@ PODS:
     - Base64 (~> 1.1.2)
   - KinCoreSDK (0.7.6):
     - StellarKit (= 0.3.6)
-  - KinDevPlatform (0.8.3):
+  - KinDevPlatform (0.8.4):
     - KinCoreSDK (= 0.7.6)
     - SimpleCoreDataStack (= 0.1.6)
   - KinUtil (0.0.6)
@@ -33,7 +33,7 @@ SPEC CHECKSUMS:
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   JWT: 6e7ec473b6febcb7498affc84f0e75d393914411
   KinCoreSDK: 691a31f0af1d0351fce9d6bacfee3f62e8bf3d34
-  KinDevPlatform: a32cc76af6a018e2d4e5f7e586f6fd80a63ef918
+  KinDevPlatform: 5d94be9623622506bf7ac6c3453628403b6538aa
   KinUtil: 1bc7b10d5dec37d268f9c3d18a54b87eba7db2e8
   SimpleCoreDataStack: 80d9c5efd1861d77432477974b3be410a202bd2f
   StellarErrors: f9239fad02b05464fbc9845063195a87d28f57d1
