@@ -13,8 +13,11 @@ import JWT
 
 class JWTUtil {
     static func encode(header: [AnyHashable: Any], body: [AnyHashable: Any], subject: String, id: String, privateKey: String) -> String? {
+        // In some instances the below guard can return false if this object isn't stored
+        let dataHolder = JWTAlgorithmRSFamilyDataHolder()
+        
         guard let key = try? JWTCryptoKeyPrivate(pemEncoded: privateKey, parameters: nil),
-            let holder = (JWTAlgorithmRSFamilyDataHolder().signKey(key)?.secretData(privateKey.data(using: .utf8))?.algorithmName(JWTAlgorithmNameRS512) as? JWTAlgorithmRSFamilyDataHolder) else {
+            let holder = (dataHolder.signKey(key)?.secretData(privateKey.data(using: .utf8))?.algorithmName(JWTAlgorithmNameRS512) as? JWTAlgorithmRSFamilyDataHolder) else {
                 return nil
         }
         let claims = JWTClaimsSet()
