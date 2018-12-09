@@ -20,6 +20,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var titleLabel: UILabel!
     
     let environment: Environment = .playground
+    var lastOfferId: String? = nil
     
     var appKey: String? {
         return configValue(for: "appKey", of: String.self)
@@ -73,7 +74,6 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func newUserTapped(_ sender: Any) {
-        
         let numberIndex = lastUser.index(after: lastUser.range(of: "_", options: [.backwards])!.lowerBound)
         let plusone = Int(lastUser.suffix(from: numberIndex))! + 1
         let newUser = String(lastUser.prefix(upTo: numberIndex) + "\(plusone)")
@@ -179,6 +179,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
             alertStartError(error)
         }
         let offerID = "WOWOMGCRAZY"+"\(arc4random_uniform(999999))"
+        lastOfferId = offerID
         guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
                                                     "typ": "jwt",
                                                     "kid" : "rs512_0"],
@@ -236,6 +237,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         }
         
         let offerID = "WOWOMGCRAZY"+"\(arc4random_uniform(999999))"
+        lastOfferId = offerID
         guard let encoded = JWTUtil.encode(header: ["alg": "RS512",
                                                     "typ": "jwt",
                                                     "kid" : "rs512_0"],
@@ -246,14 +248,14 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                                                      "user_id":lastUser],
                                                   "recipient":
                                                     ["title":"Received Kin",
-                                                    "description":"A P2P example",
-                                                    "user_id": receipientUserId]],
-                                                    subject: "pay_to_user",
-                                                    id: appId,
-                                                    privateKey: jwtPKey) else {
-                                                        alertConfigIssue()
-                                                        return
-                                                    }
+                                                     "description":"A P2P example",
+                                                     "user_id": receipientUserId]],
+                                           subject: "pay_to_user",
+                                           id: appId,
+                                           privateKey: jwtPKey) else {
+                                            alertConfigIssue()
+                                            return
+        }
         
         spendIndicator.startAnimating()
         _ = Kin.shared.payToUser(offerJWT: encoded) { jwtConfirmation, error in
@@ -287,6 +289,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         
         let amount = 10
         let offerID = "WOWOMGCRAZY"+"\(arc4random_uniform(999999))"
+        lastOfferId = offerID
         
         guard let appId = appId, let jwtPKey = privateKey else {
             alertConfigIssue()
@@ -307,12 +310,12 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                                                     ["title":"Received Kin",
                                                      "description":"Native Earn example",
                                                      "user_id": lastUser]],
-                                                     subject: "earn",
-                                                     id: appId,
-                                                     privateKey: jwtPKey) else {
-                                                        alertConfigIssue()
-                                                        return
-                                                        }
+                                           subject: "earn",
+                                           id: appId,
+                                           privateKey: jwtPKey) else {
+                                            alertConfigIssue()
+                                            return
+        }
         spendIndicator.startAnimating()
         _ = Kin.shared.requestPayment(offerJWT: encoded) { jwtConfirmation, error in
             DispatchQueue.main.async { [weak self] in
@@ -336,6 +339,62 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                 }))
                 
                 self?.present(alert, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    @IBAction func orderConfirmationTapped(_ sender: Any) {
+        guard let offerId = lastOfferId else{
+            
+            let alert = UIAlertController(title: "No Order has Been Made", message: "No Order was sent in this session yet.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Oh ok", style: .cancel, handler: { [weak alert] action in
+                alert?.dismiss(animated: true, completion: nil)
+            }))
+            self.present(alert, animated: true, completion: nil)
+            
+            return
+        }
+        print("orderConfirmationTapped offerId : \(offerId)")
+        guard let appId = appId, let jwtPKey = privateKey else {
+            alertConfigIssue()
+            return
+        }
+        
+        do {
+            try jwtLoginWith(lastUser, id: appId)
+        } catch {
+            alertStartError(error)
+        }
+        
+        Kin.shared.orderConfirmation(for: offerId) { (status, err) in
+            DispatchQueue.main.async { [weak self] in
+                if let s = status {
+                    let statusMsg :String = String(reflecting :s)
+                    
+                    let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+                    if let e = err {
+                        alert.title = "Failure"
+                        alert.message = "Native Earn failed: (\(e.localizedDescription))"
+                    } else {
+                        alert.title = "Get Order Confirmation - Success"
+                        alert.message = "status: \(statusMsg)\n"
+                        switch s{
+                        case .completed(let jwt):
+                            alert.addAction(UIAlertAction(title: "You can view the confirmation on jwt.io, View on jwt.io", style: .default, handler: { [weak alert] action in
+                                UIApplication.shared.openURL(URL(string:"https://jwt.io/#debugger-io?token=\(jwt)")!)
+                                alert?.dismiss(animated: true, completion: nil)
+                            }))
+                        case .pending: break
+                        case .failed: break
+                        }
+                        
+                        alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: { [weak alert] action in
+                            alert?.dismiss(animated: true, completion: nil)
+                        }))
+                        
+                        self?.present(alert, animated: true, completion: nil)
+                    }
+                }
             }
         }
     }
