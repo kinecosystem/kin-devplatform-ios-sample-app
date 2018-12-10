@@ -347,9 +347,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
         guard let offerId = lastOfferId else{
             
             let alert = UIAlertController(title: "No Order has Been Made", message: "No Order was sent in this session yet.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Oh ok", style: .cancel, handler: { [weak alert] action in
-                alert?.dismiss(animated: true, completion: nil)
-            }))
+            alert.addAction(UIAlertAction(title: "Oh ok", style: .cancel))
             self.present(alert, animated: true, completion: nil)
             
             return
@@ -388,9 +386,7 @@ class SampleAppViewController: UIViewController, UITextFieldDelegate {
                         case .failed: break
                         }
                         
-                        alert.addAction(UIAlertAction(title: "Close", style: .cancel, handler: { [weak alert] action in
-                            alert?.dismiss(animated: true, completion: nil)
-                        }))
+                        alert.addAction(UIAlertAction(title: "Close", style: .cancel))
                         
                         self?.present(alert, animated: true, completion: nil)
                     }
